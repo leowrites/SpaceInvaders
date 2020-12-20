@@ -1,20 +1,14 @@
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 
 public class GameLoop implements Runnable {
 
     /*the game loop
      * Handles the game status
      * Needs to receive status update from the game loop
+     * Does not handle adding or removing panels from the window
      */
 
-    PlayerSpaceCraft player1;
-    AlienSpaceCraft alien1;
-
+    private GameWindow gameWindow = new GameWindow();
+    private GameBoard gameBoard = new GameBoard();
     public enum GameStatus{
         start, inGame, paused, gameOver
     }
@@ -23,13 +17,18 @@ public class GameLoop implements Runnable {
         return gameStatus;
     }
 
+    public void setGameStatus(GameStatus gameStatus){
+        this.gameStatus = gameStatus;
+    }
+
     private GameStatus gameStatus = GameStatus.start;
 
 
     public void run(){
 
-        //while (state from main RUNNING) = true
-        //this should be where everything comes together
+        gameWindow.add(gameBoard);
+        gameWindow.revalidate();
+
         while (gameStatus == GameStatus.inGame) {
             update();
 
@@ -46,13 +45,17 @@ public class GameLoop implements Runnable {
 
     public static void main (String[] args){
 
+        // windows and other initializations can take place in different functions
+
         GameLoop gameLoop = new GameLoop();
-
+        gameLoop.setGameStatus(GameStatus.inGame);
         switch (gameLoop.gameStatus) {  //only the inGame status will have its own thread
-
+            case start:
             case inGame:
-            Thread gameThread = new Thread(new GameLoop());
-            gameThread.start();
+                Thread gameThread = new Thread(gameLoop);
+                gameThread.start();
+            case paused:
+            case gameOver:
         }
 
     }

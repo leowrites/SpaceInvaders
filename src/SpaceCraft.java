@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
 public abstract class SpaceCraft{
@@ -16,20 +17,13 @@ public abstract class SpaceCraft{
 class PlayerSpaceCraft extends SpaceCraft{
 
     private Point objectLocation;
-    private JLabel spaceCraft;
-    private Image icon;
     private Bullet bullet = new Bullet();
+    private int vX = 0;
+    private int vY = 0;
+    Thread bulletCoolDown;
 
     public Point getObjectLocation() {
         return objectLocation;
-    }
-
-    public JLabel getSpaceCraft() {
-        return spaceCraft;
-    }
-
-    public Image getIcon() {
-        return icon;
     }
 
     public Bullet getBullet() {
@@ -40,12 +34,12 @@ class PlayerSpaceCraft extends SpaceCraft{
         return bulletCoolDown;
     }
 
-    Thread bulletCoolDown;
-
-
     PlayerSpaceCraft(Point spawnLocation, Bullet bullet) {
 
-        super( spawnLocation, bullet);
+        super(spawnLocation, bullet);
+
+        this.objectLocation = spawnLocation;
+        this.bullet = bullet;
         //construct a space craft object with all its attributes
 
     }
@@ -53,11 +47,9 @@ class PlayerSpaceCraft extends SpaceCraft{
     void move(String direction){
 
         if (direction.equals("right")){
-            this.objectLocation.x ++;
-            spaceCraft.setLocation(this.objectLocation);
+            this.objectLocation.x += 10;
         }else if (direction.equals("left")){
-            this.objectLocation.x --;
-            spaceCraft.setLocation(this.objectLocation);
+            this.objectLocation.x -= 10;
         }
 
     }
@@ -86,7 +78,7 @@ class PlayerSpaceCraft extends SpaceCraft{
 class AlienSpaceCraft extends SpaceCraft{
 
 
-    AlienSpaceCraft(Image icon, Point spawnLocation, Bullet bullet) {
+    AlienSpaceCraft( Point spawnLocation, Bullet bullet) {
         super(spawnLocation, bullet);
     }
 }

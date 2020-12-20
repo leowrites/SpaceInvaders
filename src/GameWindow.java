@@ -4,8 +4,9 @@ import java.awt.*;
 public class GameWindow extends JFrame {
     //Where the frame is created
     GameWindow(){
-        setPreferredSize(new Dimension(500,500));
-        setLayout(null);
+        super("Space Invaders By Leo");
+        setSize(new Dimension(500,500));
+        setLocationRelativeTo(null);
         setVisible(true);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
     }
