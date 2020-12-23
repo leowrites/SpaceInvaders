@@ -10,17 +10,19 @@ public class GameBoard extends JPanel {
     private final PlayerSpaceCraft player1;
     private ArrayList<AlienSpaceCraft> alienSpaceCrafts;
 
-    GameBoard(PlayerSpaceCraft spaceCraft, Dimension size, ArrayList<AlienSpaceCraft> alienSpaceCrafts){
+    GameBoard(PlayerSpaceCraft spaceCraft, Dimension size, ArrayList<AlienSpaceCraft> alienSpaceCrafts) {
         setPreferredSize(size);
         setBackground(Color.BLACK);
         isFocusable();
         requestFocus();
+        //need to scale the images
 
         this.alienSpaceCrafts = alienSpaceCrafts;
         this.player1 = spaceCraft;
     }
 
-    public void paintComponent(Graphics graphics){
+
+    public void paintComponent(Graphics graphics) {
         //objects will be drawn directly onto the panel, no need for JLabel
         super.paintComponent(graphics);
         try {
@@ -36,36 +38,26 @@ public class GameBoard extends JPanel {
     void drawPlayerSpaceCraft(Graphics graphics) throws IOException {
         int playerX = player1.getObjectLocation().x;
         int playerY = player1.getObjectLocation().y;
-        BufferedImage scaledImage = scaleImage(player1.getImage(),50,50);
-        graphics.drawImage(scaledImage,playerX,playerY,null);
+        graphics.drawImage(player1.getPlayerSpaceCraftImage(), playerX, playerY, null);
     }
 
-    void drawAlienSpaceCraft(Graphics graphics){
-        for (AlienSpaceCraft alienSpaceCraft: alienSpaceCrafts){
+    void drawAlienSpaceCraft(Graphics graphics) {
+        for (AlienSpaceCraft alienSpaceCraft : alienSpaceCrafts) {
             int alienX = alienSpaceCraft.getObjectLocation().x;
             int alienY = alienSpaceCraft.getObjectLocation().y;
-            BufferedImage scaledImage = scaleImage(alienSpaceCraft.getImage(),50,50);
-            graphics.drawImage(scaledImage, alienX, alienY, null);
+            graphics.drawImage(alienSpaceCraft.getAlienSpaceCraftImage(), alienX, alienY, null);
         }
     }
 
-    void drawBullet(Graphics graphics){
+    void drawBullet(Graphics graphics) {
         if (player1.getBullets() != null) {
-            for (int i = player1.getBullets().size() - 1; i > 0; i --) {
+            for (int i = player1.getBullets().size() - 1; i > 0; i--) {
                 Bullet thisBullet = player1.getBullets().get(i);
                 int bulletX = thisBullet.getObjectLocation().x;
                 int bulletY = thisBullet.getObjectLocation().y;
-                BufferedImage scaledImage = scaleImage(player1.getBullets().get(0).getImage(), 30, 30);
-                graphics.drawImage(scaledImage, bulletX, bulletY, null);
+                graphics.drawImage(thisBullet.getBulletImage(), bulletX, bulletY, null);
             }
         }
-    }
-
-    BufferedImage scaleImage(Image image, int targetWidth, int targetHeight){
-        Image afterScaling = image.getScaledInstance(targetWidth,targetHeight,Image.SCALE_SMOOTH);
-        BufferedImage output = new BufferedImage(targetWidth,targetHeight,BufferedImage.TYPE_INT_RGB);
-        output.createGraphics().drawImage(afterScaling,0,0,null);
-        return output;
     }
 
 }

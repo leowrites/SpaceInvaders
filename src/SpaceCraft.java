@@ -1,5 +1,6 @@
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,21 +9,32 @@ public abstract class SpaceCraft {
     //An abstract class for all types of space crafts
 
     //move function takes in a location and returns a location
+
+    SpaceCraft() throws IOException {
+        BufferedImage explosionImage = scaleImage(ImageIO.read(new File("explosion.png")));
+    }
+
     void shoot() throws IOException {
     }
 
     void hitCheck() {
         //a universal method for checking
 
+    }
 
+    BufferedImage scaleImage(Image image) {
+        Image afterScaling = image.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+        BufferedImage output = new BufferedImage(50, 50, BufferedImage.TYPE_INT_RGB);
+        output.createGraphics().drawImage(afterScaling, 0, 0, null);
+        return output;
     }
 
 }
 
-class PlayerSpaceCraft extends SpaceCraft{
+class PlayerSpaceCraft extends SpaceCraft {
 
     private final Point objectLocation;
-    private final Image image = ImageIO.read(new File("player.png"));
+    private final BufferedImage playerSpaceCraftImage = super.scaleImage(ImageIO.read(new File("player.png")));
 
     PlayerSpaceCraft(Point spawnLocation) throws IOException {
         super();
@@ -33,6 +45,7 @@ class PlayerSpaceCraft extends SpaceCraft{
 
     private boolean right = false;
     private boolean left = false;
+
     void move() {
         /*
         There was a lag when changing directions, for example when changing direction from left to right
@@ -42,17 +55,16 @@ class PlayerSpaceCraft extends SpaceCraft{
         int velocityX = 0;
         if (right) {
             if (objectLocation.x < 750) {
-                    velocityX = 5;
-            }else {
+                velocityX = 5;
+            } else {
                 objectLocation.x = 750;
             }
             objectLocation.x += velocityX;
-        }
-        else if (left) {
+        } else if (left) {
             if (objectLocation.x > 0) {
-                    velocityX = -5;
+                velocityX = -5;
 
-            }else {
+            } else {
                 objectLocation.x = 0;
             }
             objectLocation.x += velocityX;
@@ -67,23 +79,23 @@ class PlayerSpaceCraft extends SpaceCraft{
         //when in cool down, spacecraft cannot fire.
         //user can fire 5 bullets
         int maximumAmountOfBullets = 5;
-        if (bullets.size() - 1 < maximumAmountOfBullets){
+        if (bullets.size() - 1 < maximumAmountOfBullets) {
             Point currentPosition = new Point(objectLocation.x, objectLocation.y);
             Bullet bullet = new Bullet(currentPosition, "player");
             bullets.add(bullet);
-           System.out.println("Bullet Fired!");
+            System.out.println("Bullet Fired!");
         }
     }
 
     void hitCheck() {
     }
 
-    public Point getObjectLocation() {
-        return objectLocation;
+    public BufferedImage getPlayerSpaceCraftImage() {
+        return playerSpaceCraftImage;
     }
 
-    public Image getImage(){
-        return image;
+    public Point getObjectLocation() {
+        return objectLocation;
     }
 
     public void setRight(boolean right) {
@@ -103,39 +115,44 @@ class AlienSpaceCraft extends SpaceCraft {
 
     private final Point objectLocation;
     private boolean moveDown;
+    private final BufferedImage alienSpaceCraftImage = super.scaleImage(ImageIO.read(new File("enemy.png")));
 
     AlienSpaceCraft(Point spawnLocation) throws IOException {
+
         super();
         this.objectLocation = spawnLocation;
     }
-    private final Image image = ImageIO.read(new File("enemy.png"));
 
     public void move(boolean right) {
         if (right) {
-            objectLocation.x += 1;
+            objectLocation.x += 5;
             if (objectLocation.x > 700) {
                 objectLocation.x = 700;
                 moveDown = true;
             }
         } else {
-            objectLocation.x -= 1;
-            if (objectLocation.x < 0) {
-                objectLocation.x = 0;
+            objectLocation.x -= 5;
+            if (objectLocation.x < 50) {
+                objectLocation.x = 50;
                 moveDown = true;
             }
         }
     }
 
+    public BufferedImage getAlienSpaceCraftImage() {
+        return alienSpaceCraftImage;
+    }
+
     public void setMoveDown(boolean moveDown) {
         this.moveDown = moveDown;
     }
+
     public boolean isMoveDown() {
         return moveDown;
     }
+
     public Point getObjectLocation() {
         return objectLocation;
     }
-    public Image getImage() {
-        return image;
-    }
+
 }
