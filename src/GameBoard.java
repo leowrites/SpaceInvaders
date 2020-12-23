@@ -2,8 +2,6 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -15,44 +13,13 @@ public class GameBoard extends JPanel {
     private int score;
 
 
-    GameBoard(){
-        setPreferredSize(new Dimension(800,800));
+    GameBoard(PlayerSpaceCraft spaceCraft, Dimension size){
+        setPreferredSize(size);
         setBackground(Color.BLACK);
         isFocusable();
         requestFocus();
 
-
-        player1 = new PlayerSpaceCraft(new Point(200,200), new Bullet());
-        int IFW = JComponent.WHEN_IN_FOCUSED_WINDOW;
-        getInputMap(IFW).put(KeyStroke.getKeyStroke("LEFT"),"left");
-
-        //handles movement
-        Action moveLeft = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                player1.move("left");    //call method
-            }
-        };
-        getActionMap().put("left", moveLeft);
-        getInputMap(IFW).put(KeyStroke.getKeyStroke("RIGHT"),"right");
-        Action moveRight = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                player1.move("right");
-            }
-        };
-        getActionMap().put("right", moveRight);
-
-        //handles shooting
-        getInputMap(IFW).put(KeyStroke.getKeyStroke("SPACE"),"shoot");
-        Action fire = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                player1.bulletCoolDown = new Thread(player1::shoot);
-                player1.bulletCoolDown.start();
-            }
-        };
-        getActionMap().put("shoot",fire);
+        this.player1 = spaceCraft;
     }
 
     public void paintComponent(Graphics graphics){
@@ -60,6 +27,7 @@ public class GameBoard extends JPanel {
         super.paintComponent(graphics);
         try {
             drawPlayerSpaceCraft(graphics);
+            drawBullet(graphics);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -69,17 +37,27 @@ public class GameBoard extends JPanel {
     void drawPlayerSpaceCraft(Graphics graphics) throws IOException {
         int playerX = player1.getObjectLocation().x;
         int playerY = player1.getObjectLocation().y;
-        graphics.drawImage(scaleImage(ImageIO.read(new File("player.png"))),playerX,playerY,null);
+        BufferedImage scaledImage = scaleImage(player1.getImage(),50,50);
+        graphics.drawImage(scaledImage,playerX,playerY,null);
     }
 
     void drawAlienSpaceCraft(Graphics graphics){
 
     }
 
+    void drawBullet(Graphics graphics){
+        if (player1.getBullet() != null) {
+            int bulletX = player1.getBullet().getObjectLocation().x;
+            int bulletY = player1.getBullet().getObjectLocation().y;
+            BufferedImage scaledImage = scaleImage(player1.getBullet().getImage(), 30,30);
+            graphics.drawImage(scaledImage, bulletX, bulletY, null);
+        }
+    }
 
-    BufferedImage scaleImage(Image image){
-        Image afterScaling = image.getScaledInstance(50,50,Image.SCALE_SMOOTH);
-        BufferedImage output = new BufferedImage(50,50,BufferedImage.TYPE_INT_RGB);
+
+    BufferedImage scaleImage(Image image, int targetWidth, int targetHeight){
+        Image afterScaling = image.getScaledInstance(targetWidth,targetHeight,Image.SCALE_SMOOTH);
+        BufferedImage output = new BufferedImage(targetWidth,targetHeight,BufferedImage.TYPE_INT_RGB);
         output.createGraphics().drawImage(afterScaling,0,0,null);
         return output;
     }
