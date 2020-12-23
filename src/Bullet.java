@@ -11,16 +11,20 @@ public class Bullet {
     //in the player class, if bullet "hits" a space craft, the spacecraft dies
     //if a bullet hits a bullet, it cancels out
 
-    Bullet(Point spaceCraftLocation) throws IOException {
+    Bullet(Point spaceCraftLocation, String owner) throws IOException {
         this.objectLocation = spaceCraftLocation;
     }
-    private Point objectLocation;
 
-    private Image image = ImageIO.read(new File("bullet.png"));
+    private final Point objectLocation;
+    private final Image image = ImageIO.read(new File("bullet.png"));
+    private boolean hit = false;
 
     void move(){
-        int velocityY = 3;
+        int velocityY = 5;
         objectLocation.y -= velocityY;
+        if (objectLocation.y <= 0){
+            hit = true;
+        }
     }
 
     public Point getObjectLocation() {
@@ -31,4 +35,7 @@ public class Bullet {
         return image;
     }
 
+    public boolean isHit() {
+        return hit;
+    }
 }

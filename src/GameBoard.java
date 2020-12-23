@@ -1,24 +1,22 @@
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class GameBoard extends JPanel {
     // creates the board panel in different stages, start, in game, pause, and game over
 
-    private PlayerSpaceCraft player1;
-    private int score;
+    private final PlayerSpaceCraft player1;
+    private ArrayList<AlienSpaceCraft> alienSpaceCrafts;
 
-
-    GameBoard(PlayerSpaceCraft spaceCraft, Dimension size){
+    GameBoard(PlayerSpaceCraft spaceCraft, Dimension size, ArrayList<AlienSpaceCraft> alienSpaceCrafts){
         setPreferredSize(size);
         setBackground(Color.BLACK);
         isFocusable();
         requestFocus();
 
+        this.alienSpaceCrafts = alienSpaceCrafts;
         this.player1 = spaceCraft;
     }
 
@@ -27,11 +25,12 @@ public class GameBoard extends JPanel {
         super.paintComponent(graphics);
         try {
             drawPlayerSpaceCraft(graphics);
+            drawAlienSpaceCraft(graphics);
             drawBullet(graphics);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        repaint();
+        graphics.dispose();
     }
 
     void drawPlayerSpaceCraft(Graphics graphics) throws IOException {
@@ -42,18 +41,25 @@ public class GameBoard extends JPanel {
     }
 
     void drawAlienSpaceCraft(Graphics graphics){
-
-    }
-
-    void drawBullet(Graphics graphics){
-        if (player1.getBullet() != null) {
-            int bulletX = player1.getBullet().getObjectLocation().x;
-            int bulletY = player1.getBullet().getObjectLocation().y;
-            BufferedImage scaledImage = scaleImage(player1.getBullet().getImage(), 30,30);
-            graphics.drawImage(scaledImage, bulletX, bulletY, null);
+        for (AlienSpaceCraft alienSpaceCraft: alienSpaceCrafts){
+            int alienX = alienSpaceCraft.getObjectLocation().x;
+            int alienY = alienSpaceCraft.getObjectLocation().y;
+            BufferedImage scaledImage = scaleImage(alienSpaceCraft.getImage(),50,50);
+            graphics.drawImage(scaledImage, alienX, alienY, null);
         }
     }
 
+    void drawBullet(Graphics graphics){
+        if (player1.getBullets() != null) {
+            for (int i = player1.getBullets().size() - 1; i > 0; i --) {
+                Bullet thisBullet = player1.getBullets().get(i);
+                int bulletX = thisBullet.getObjectLocation().x;
+                int bulletY = thisBullet.getObjectLocation().y;
+                BufferedImage scaledImage = scaleImage(player1.getBullets().get(0).getImage(), 30, 30);
+                graphics.drawImage(scaledImage, bulletX, bulletY, null);
+            }
+        }
+    }
 
     BufferedImage scaleImage(Image image, int targetWidth, int targetHeight){
         Image afterScaling = image.getScaledInstance(targetWidth,targetHeight,Image.SCALE_SMOOTH);

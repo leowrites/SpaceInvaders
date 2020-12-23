@@ -2,13 +2,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.awt.image.BufferStrategy;
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Date;
+import java.util.ArrayList;
 
-public class Main implements Runnable {
+public class Main implements Runnable{
 
     /*the game loop
      * Handles the game status
@@ -24,14 +21,26 @@ public class Main implements Runnable {
 
     public static void main (String[] args) throws IOException {
 
+        int maximumAlienCapacity = 20;
+        ArrayList<AlienSpaceCraft> alienSpaceCrafts = new ArrayList<>();
+        int objectsInRow = 0;
+        int rowCount = 0;
+        for (int i = 0; i < maximumAlienCapacity; i ++){
+                alienSpaceCrafts.add(new AlienSpaceCraft(new Point(20 + 50 * objectsInRow,20 + 50 * rowCount)));
+                objectsInRow++;
+                if (objectsInRow == 10){
+                    objectsInRow = 0;
+                    rowCount ++;
+                }
+        }
         GameWindow gameWindow = new GameWindow();
         int actualHeight = gameWindow.getContentPane().getHeight();
         int actualWidth = gameWindow.getContentPane().getWidth();
         PlayerSpaceCraft player1 = new PlayerSpaceCraft(new Point(400,700));
-        GameBoard gameBoard = new GameBoard(player1, new Dimension (actualWidth, actualHeight));
+        GameBoard gameBoard = new GameBoard(player1, new Dimension (actualWidth, actualHeight),alienSpaceCrafts);
         gameWindow.add(gameBoard);
         gameWindow.revalidate();
-        Main game = new Main(player1);
+        Main game = new Main(player1, alienSpaceCrafts, gameBoard);
         game.start();
 
         //handles movement
@@ -42,7 +51,7 @@ public class Main implements Runnable {
         Action moveLeft = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                player1.setDirection("left");
+                player1.setLeft(true);
             }
         };
         gameBoard.getActionMap().put("left", moveLeft);
@@ -50,7 +59,7 @@ public class Main implements Runnable {
         Action moveRight = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                player1.setDirection("right");
+                player1.setRight(true);
             }
         };
         gameBoard.getActionMap().put("right",moveRight);
@@ -60,7 +69,7 @@ public class Main implements Runnable {
         Action releaseLeft = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                player1.setDirection("");
+                player1.setLeft(false);
             }
         };
         gameBoard.getActionMap().put("releaseLeft", releaseLeft);
@@ -68,7 +77,7 @@ public class Main implements Runnable {
         Action releaseRight = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                player1.setDirection("");
+                player1.setRight(false);
             }
         };
         gameBoard.getActionMap().put("releaseRight", releaseRight);
@@ -87,17 +96,20 @@ public class Main implements Runnable {
         };
         gameBoard.getActionMap().put("shoot",fire);
 
-        // windows and other initializations can take place in different functions
-
     }
+
 
     private Thread gameLoop;
     private boolean running = false;
     private GameStatus gameStatus = GameStatus.start;
     private final PlayerSpaceCraft player1;
+    private ArrayList<AlienSpaceCraft> alienSpaceCrafts;
+    private GameBoard gameBoard;
 
-    Main(PlayerSpaceCraft player1){
+    Main(PlayerSpaceCraft player1, ArrayList<AlienSpaceCraft> alienSpaceCrafts, GameBoard gameBoard){
         this.player1 = player1;
+        this.alienSpaceCrafts = alienSpaceCrafts;
+        this.gameBoard = gameBoard;
     }
 
     private synchronized void start(){
@@ -152,7 +164,7 @@ public class Main implements Runnable {
 
             if (System.currentTimeMillis() - timer > 1000){
                 timer += 1000;
-                System.out.println(updates + " Ticks, Fps " + frames);
+                System.out.println(updates + " Ticks, FPS " + frames);
                 updates = 0;
                 frames = 0;
             }
@@ -161,19 +173,39 @@ public class Main implements Runnable {
 
     }
 
+    int currentRow = 0;
     void tick(){
         //everything that updates
         player1.move();
-        if (player1.getBullet() != null){
-            player1.getBullet().move();
+        if (player1.getBullets() != null){
+            for (int i = player1.getBullets().size() - 1; i > 0; i --) {
+                Bullet thisBullet = player1.getBullets().get(i);
+                if (thisBullet.isHit()){
+                    player1.getBullets().remove(thisBullet);
+                }
+                thisBullet.move();
+            }
         }
-        //figure out how to return the velocity to 0
-
+        int max = alienSpaceCrafts.size();
+        for (int i = max - 1; i >= 0; i--) {
+            AlienSpaceCraft alienSpaceCraft = alienSpaceCrafts.get(i);
+            if (currentRow % 2 == 0) {
+               alienSpaceCraft.move(true);
+            } else {
+                alienSpaceCraft.move(false);
+            }
+            if (alienSpaceCraft.isMoveDown()) {
+                for (AlienSpaceCraft alienSpaceCraft1 : alienSpaceCrafts) {
+                    alienSpaceCraft1.getObjectLocation().y += 20;
+                    alienSpaceCraft1.setMoveDown(false);
+                }
+                currentRow++;
+            }
+        }
     }
 
-    void render(){
-        //everything that renders
-
+    public void render(){
+        gameBoard.repaint();
     }
 
     public GameStatus getGameStatus() {
