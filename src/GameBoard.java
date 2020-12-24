@@ -1,6 +1,8 @@
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -8,7 +10,8 @@ public class GameBoard extends JPanel {
     // creates the board panel in different stages, start, in game, pause, and game over
 
     private final PlayerSpaceCraft player1;
-    private ArrayList<AlienSpaceCraft> alienSpaceCrafts;
+    private final ArrayList<AlienSpaceCraft> alienSpaceCrafts;
+    ArrayList<AlienSpaceCraft> killedAlienSpaceCrafts = new ArrayList<>();
 
     GameBoard(PlayerSpaceCraft spaceCraft, Dimension size, ArrayList<AlienSpaceCraft> alienSpaceCrafts) {
         setPreferredSize(size);
@@ -42,10 +45,10 @@ public class GameBoard extends JPanel {
     }
 
     void drawAlienSpaceCraft(Graphics graphics) {
-        for (AlienSpaceCraft alienSpaceCraft : alienSpaceCrafts) {
-            int alienX = alienSpaceCraft.getObjectLocation().x;
-            int alienY = alienSpaceCraft.getObjectLocation().y;
-            graphics.drawImage(alienSpaceCraft.getAlienSpaceCraftImage(), alienX, alienY, null);
+        for (int i = alienSpaceCrafts.size() - 1 ; i >= 0; i--) {
+                int alienX = alienSpaceCrafts.get(i).getObjectLocation().x;
+                int alienY = alienSpaceCrafts.get(i).getObjectLocation().y;
+                graphics.drawImage(alienSpaceCrafts.get(i).getAlienSpaceCraftImage(), alienX, alienY, null);
         }
     }
 
@@ -58,6 +61,13 @@ public class GameBoard extends JPanel {
                 graphics.drawImage(thisBullet.getBulletImage(), bulletX, bulletY, null);
             }
         }
+        for (int i = alienSpaceCrafts.size() - 1; i > 0; i--){
+            Bullet thisBullet = alienSpaceCrafts.get(i).getBullet();
+            if (thisBullet != null){
+            int bulletX = thisBullet.getObjectLocation().x;
+            int bulletY = thisBullet.getObjectLocation().y;
+                graphics.drawImage(thisBullet.getBulletImage(), bulletX, bulletY, null);
+            }
+        }
     }
-
 }

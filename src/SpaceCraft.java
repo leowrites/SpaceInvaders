@@ -10,16 +10,14 @@ public abstract class SpaceCraft {
 
     //move function takes in a location and returns a location
 
+    private final BufferedImage explosionImage;
+    private boolean hit = false;
+
     SpaceCraft() throws IOException {
-        BufferedImage explosionImage = scaleImage(ImageIO.read(new File("explosion.png")));
+        this.explosionImage = scaleImage(ImageIO.read(new File("explosion.png")));
     }
 
     void shoot() throws IOException {
-    }
-
-    void hitCheck() {
-        //a universal method for checking
-
     }
 
     BufferedImage scaleImage(Image image) {
@@ -29,12 +27,24 @@ public abstract class SpaceCraft {
         return output;
     }
 
+    public BufferedImage getExplosionImage() {
+        return explosionImage;
+    }
+
+    public boolean isHit() {
+        return hit;
+    }
+
+    public void setHit(boolean hit) {
+        this.hit = hit;
+    }
+
 }
 
 class PlayerSpaceCraft extends SpaceCraft {
 
     private final Point objectLocation;
-    private final BufferedImage playerSpaceCraftImage = super.scaleImage(ImageIO.read(new File("player.png")));
+    private BufferedImage playerSpaceCraftImage = super.scaleImage(ImageIO.read(new File("player.png")));
 
     PlayerSpaceCraft(Point spawnLocation) throws IOException {
         super();
@@ -46,7 +56,7 @@ class PlayerSpaceCraft extends SpaceCraft {
     private boolean right = false;
     private boolean left = false;
 
-    void move() {
+    public void move() {
         /*
         There was a lag when changing directions, for example when changing direction from left to right
         the space craft would stop for 1 second and then move. This was fixed by using a boolean, and set
@@ -73,21 +83,38 @@ class PlayerSpaceCraft extends SpaceCraft {
 
     private final ArrayList<Bullet> bullets = new ArrayList<>();
 
-    void shoot() throws IOException {
+    public void shoot() throws IOException {
 
         //fires first, then go to cool down.
         //when in cool down, spacecraft cannot fire.
         //user can fire 5 bullets
-        int maximumAmountOfBullets = 5;
+        int maximumAmountOfBullets = 1;
         if (bullets.size() - 1 < maximumAmountOfBullets) {
             Point currentPosition = new Point(objectLocation.x, objectLocation.y);
             Bullet bullet = new Bullet(currentPosition, "player");
             bullets.add(bullet);
-            System.out.println("Bullet Fired!");
         }
     }
 
-    void hitCheck() {
+    public void hitCheck(ArrayList<Bullet> enemyBullets) {
+        for (Bullet bullet : enemyBullets) {
+            if (bullet != null) {
+                int xMax = this.getObjectLocation().x + 30;
+                int xMin = this.getObjectLocation().x - 30;
+                int yMax = this.getObjectLocation().y + 30;
+                int yMin = this.getObjectLocation().y - 30;
+                int bulletX = bullet.getObjectLocation().x;
+                int bulletY = bullet.getObjectLocation().y;
+                if (bulletX <= xMax && bulletX >= xMin && bulletY <= yMax && bulletY >= yMin) {
+                    bullet.setHit(true);
+                    this.setHit(true);
+                }
+            }
+        }
+    }
+
+    public void kill() {
+        this.playerSpaceCraftImage = getExplosionImage();
     }
 
     public BufferedImage getPlayerSpaceCraftImage() {
@@ -115,12 +142,17 @@ class AlienSpaceCraft extends SpaceCraft {
 
     private final Point objectLocation;
     private boolean moveDown;
-    private final BufferedImage alienSpaceCraftImage = super.scaleImage(ImageIO.read(new File("enemy.png")));
+    private BufferedImage alienSpaceCraftImage = super.scaleImage(ImageIO.read(new File("enemy.png")));
+    private final int row;
+    private final int column;
+    private Bullet bullet;
 
-    AlienSpaceCraft(Point spawnLocation) throws IOException {
+    AlienSpaceCraft(Point spawnLocation, int column, int row) throws IOException {
 
         super();
         this.objectLocation = spawnLocation;
+        this.row = row;
+        this.column = column;
     }
 
     public void move(boolean right) {
@@ -139,6 +171,43 @@ class AlienSpaceCraft extends SpaceCraft {
         }
     }
 
+    public void shoot() throws IOException {
+        Point currentPosition = new Point(objectLocation.x, objectLocation.y);
+        bullet = new Bullet(currentPosition, "alien");
+    }
+
+
+    public void kill() {
+        this.alienSpaceCraftImage = getExplosionImage();
+    }
+
+    public void hitCheck(ArrayList<Bullet> playerBullets) {
+
+        if (playerBullets != null) {
+            for (Bullet bullet : playerBullets) {
+                int xMax = this.objectLocation.x + 30;
+                int xMin = this.objectLocation.x - 30;
+                int yMax = this.objectLocation.y + 30;
+                int yMin = this.objectLocation.y - 30;
+                int bulletX = bullet.getObjectLocation().x;
+                int bulletY = bullet.getObjectLocation().y;
+                if (bulletX <= xMax && bulletX >= xMin && bulletY <= yMax && bulletY >= yMin) {
+                    //within the vicinity
+                    bullet.setHit(true);
+                    this.setHit(true);
+                }
+            }
+        }
+    }
+
+    public void setBullet(Bullet bullet) {
+        this.bullet = bullet;
+    }
+
+    public Bullet getBullet() {
+        return bullet;
+    }
+
     public BufferedImage getAlienSpaceCraftImage() {
         return alienSpaceCraftImage;
     }
@@ -153,6 +222,14 @@ class AlienSpaceCraft extends SpaceCraft {
 
     public Point getObjectLocation() {
         return objectLocation;
+    }
+
+    public int getRow() {
+        return row;
+    }
+
+    public int getColumn() {
+        return column;
     }
 
 }

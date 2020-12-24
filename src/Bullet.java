@@ -22,12 +22,8 @@ public class Bullet {
         this.owner = owner;
     }
 
-    void move() {
-        int velocityY = 5;
-        objectLocation.y -= velocityY;
-        if (objectLocation.y <= 0) {
-            hit = true;
-        }
+    void move(int velocityY) {
+        objectLocation.y += velocityY;
     }
 
     BufferedImage scaleImage(Image image) {
@@ -45,8 +41,8 @@ public class Bullet {
         return objectLocation;
     }
 
-    public String getOwner() {
-        return owner;
+    public void setHit(boolean hit){
+        this.hit = hit;
     }
 
     public boolean isHit() {
